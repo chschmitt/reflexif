@@ -1,7 +1,7 @@
 # Reflexif
 Reflexif is a pure Python Exif library that will be developed here
 from existing code of my own that is lying around in my private repositories.
-**It is not ready to be used yet. This README will be updated as
+**Reflexif is not ready to be used yet. This README will be updated as
 the development progresses.**
 
 The planned core features cover:
@@ -32,7 +32,7 @@ time being, please consult the source code.
 # Installation and usage
 When the time has come, I will provide
 a setup.py file and upload the project on PyPI. This will enable the
-installation via pip (from PyPI of from this repository).
+installation via pip (from PyPI or from this repository).
 
 In the meantime, if you fancy a try, clone into this repository and
 add the `main` folder to your `PYTHONAPTH`.
