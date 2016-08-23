@@ -1,3 +1,9 @@
 *.pyc
 **/__pycache__/
 *~
+.settings
+.project
+.pydevproject
+dist
+*.egg-info
+*.class
