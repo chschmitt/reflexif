@@ -37,12 +37,16 @@ time being, please consult the source code.
 Installation and usage
 ======================
 
-When the time has come, I will provide
-a setup.py file and upload the project on PyPI. This will enable the
-installation via pip (from PyPI or from this repository).
+Reflexif has not been uploaded to PyPI yet since there have not been any releases.
+However, you can install Reflexif directly from this git repository via:
 
-In the meantime, if you fancy a try, clone into this repository and
-add the ``main`` folder to your ``PYTHONAPTH``.
+.. code-block::
+
+    pip install git+git://github.com/chschmitt/reflexif.git
+    
+**Beware:** There is not much to be used yet. Consult the top section for
+information on the development progress.
+
 
 Why another Exif library?
 =========================
@@ -108,7 +112,7 @@ for it. For example, I won't make detours to use ``dict.iteritems()`` and its
 companions to save memory.
 
 Testing against PyPy, IronPython and Jython has no priority, but I might have
-a look at some point.
+a look at it at some point.
 
 Dependencies
 ============
@@ -138,7 +142,7 @@ to publish your contributions under the same license. You will be added
 to the AUTHORS file.
 
 **Note**: Since I am currently the only author and copyright holder, there is only me
-in the `LICENSE <https://github.com/chschmitt/reflexif/LICENSE>`_
+in the `LICENSE <https://github.com/chschmitt/reflexif/blob/master/LICENSE>`_
 file and there is no AUTHORS file to keep things simple for now.
 This will be changed when the first contribution will be merged into the repo.
 
@@ -146,7 +150,7 @@ License
 =======
 
 This project published under the 3-clause BSD license. See the
-`LICENSE <https://github.com/chschmitt/reflexif/LICENSE>`_ file.
+`LICENSE <https://github.com/chschmitt/reflexif/blob/master/LICENSE>`_ file.
 
 
 

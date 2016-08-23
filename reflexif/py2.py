@@ -24,7 +24,7 @@ def bytes(obj):
     except AttributeError:
         return str(bytearray(obj))
 
-# When this module is imported with Python >3, for example by sphinx,
+# When this module is imported with Python >2, for example by sphinx,
 # no exception should be raised.
 try:
     range = xrange
