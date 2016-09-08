@@ -4,7 +4,10 @@
 .. by Christoph Schmitt
 '''
 
+from __future__ import print_function, absolute_import, division, unicode_literals
+
 from reflexif.compat import *
+import struct
 
 
 class SourceWrapper(object):
@@ -109,7 +112,7 @@ class Frame(object):
         new_offset = self.offset + offset
         stop = new_offset + length
         if stop > self.stop:
-            raise IndexError('slicing exceeds boundary')
+            raise IndexError('slicing exceeds boundary', self, offset, length)
         cls = type(self)
         child = cls(self.source, new_offset, length)
         child.on_sliced_from(self)
@@ -117,11 +120,21 @@ class Frame(object):
 
     def __getitem__(self, index):
         if isinstance(index, slice):
-            if index.start is None or index.stop is None or index.step is not None:
+            if index.start is None:
+                start = 0
+            else:
+                start = index.start
+
+            if index.stop is None:
+                stop = self.length
+            else:
+                stop = index.stop
+
+            if index.step is not None:
                 raise IndexError('illegal slicing %r' % index)
-            if index.start < 0 or index.stop < index.start:
+            if start < 0 or stop < start:
                 raise IndexError('illegal slicing %r' % index)
-            return self.slice(index.start, index.stop-index.start)
+            return self.slice(start, stop - start)
         else:
             return self.data[index]
 
@@ -152,3 +165,19 @@ class Frame(object):
                                           self.start,
                                           self.stop,
                                           len(self))
+        
+class StructSpec(object):
+    def __init__(self, spec):
+        self.spec = spec
+        self.le = struct.Struct('>'+spec)
+        self.be = struct.Struct('<'+spec)
+        
+uint8 = StructSpec('B')
+uint16 = StructSpec('H')
+uint32 = StructSpec('I')
+uint64 = StructSpec('Q')
+
+int8 = StructSpec('b')
+int16 = StructSpec('h')
+int32 = StructSpec('i')
+int64 = StructSpec('q')

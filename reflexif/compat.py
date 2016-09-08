@@ -15,4 +15,5 @@ if sys.version_info[0] == 2:
 
 else:
     PY2 = False
-    __all__ = []
+    unicode = str
+    __all__ = ['unicode']

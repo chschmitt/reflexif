@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 .. created on 21.08.2016
 .. by Christoph Schmitt
@@ -58,16 +59,24 @@ class TestFrame(unittest.TestCase):
         with self.assertRaises(ValueError):
             f.slice(1, None)
 
+    def testSliceSpecialCases(self):
+        f = Frame(self.data, 20, 10)
+        s1 = f[:]
+        s2 = f[1:]
+        s3 = f[:1]
+
+        self.assertEqual(s1.length, f.length)
+        self.assertEqual(s2.length, f.length-1)
+        self.assertEqual(s3.length, 1)
+
+        self.assertEqual(s1.offset, f.offset)
+        self.assertEqual(s2.offset, f.offset+1)
+        self.assertEqual(s3.offset, f.offset)
+
     def testSliceFail(self):
         f = Frame(self.data, 20, 10)
         with self.assertRaises(IndexError):
-            f[:]
-        with self.assertRaises(IndexError):
-            f[:1]
-        with self.assertRaises(IndexError):
             f[:-1]
-        with self.assertRaises(IndexError):
-            f[1:]
         with self.assertRaises(IndexError):
             f[-1:]
         with self.assertRaises(IndexError):
