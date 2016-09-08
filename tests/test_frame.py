@@ -6,6 +6,7 @@
 
 from __future__ import print_function, absolute_import, division, unicode_literals
 from reflexif.compat import *
+from reflexif.compat import PY2
 
 import io
 import os
@@ -110,7 +111,13 @@ class TestFrame(unittest.TestCase):
         f = Frame(self.data, 10, 20)
         actual = bytes(self.data[10:30])
         expected = bytes(f)
-        self.assertEqual(actual[0], 10)
+        if PY2:
+            # If the Python 2 implementation offers a bytes type (e.g. IronPython),
+            # we use it, so the elemets of actual by either be ints or strings
+            # of length 1.
+            self.assertIn(actual[0], (10, b'\x0a'))
+        else:
+            self.assertEqual(actual[0], 10)
         self.assertEqual(expected, actual)
 
     def testData(self):
@@ -133,7 +140,7 @@ class TestFrameWithWrapperSource(TestFrame):
 
 
 class TestFrameWithMemoryView(TestFrame):
-    data = memoryview(bytes(range(80)))
+    data = memoryview(bytes(range(256)))
 
 
 class TestFrameWithFileSource(TestFrame):
