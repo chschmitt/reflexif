@@ -8,13 +8,13 @@ the development progresses.**
 
 The planned core features cover:
 
- - a low-level API to read and write (raw) Exif/TIFF data structures
- - a high-level API to read and write Exif tags as key-value pairs
-   that allows a high degree of control over the writing process
- - a transparent (and controllable) mapping between raw values and
-   normalized / pretty print values
- - a plugin architecture to implement makernotes, custom value mappings
-   and other hairy bits separately from the rest of the project
+- a low-level API to read and write (raw) Exif/TIFF data structures
+- a high-level API to read and write Exif tags as key-value pairs
+  that allows a high degree of control over the writing process
+- a transparent (and controllable) mapping between raw values and
+  normalized / pretty print values
+- a plugin architecture to implement makernotes, custom value mappings
+  and other hairy bits separately from the rest of the project
 
 Reflexif will take special emphasis on providing a sensible low level API
 that exposes the actual TIFF/IFD data structures, which is important

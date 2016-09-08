@@ -4,7 +4,9 @@
 .. by Christoph Schmitt
 '''
 
-from __future__ import print_function, absolute_import, division, unicode_literals
+# do not use unicode literals in this module, otherwise the Struct
+# constructor will complain
+from __future__ import print_function, absolute_import, division
 
 from reflexif.compat import *
 import struct
@@ -141,9 +143,10 @@ class Frame(object):
     @property
     def data(self):
         data = self.source[self.offset:self.offset + self.length]
-        if len(data) != self.length:
+        if len(data) < self.length:
             raise EOFError('got %d bytes at source offset %d, %d expected'
                            % (len(data), self.offset, self.length))
+
         return data
 
     def __bytes__(self):
@@ -165,13 +168,15 @@ class Frame(object):
                                           self.start,
                                           self.stop,
                                           len(self))
-        
+
+
 class StructSpec(object):
     def __init__(self, spec):
         self.spec = spec
         self.le = struct.Struct('>'+spec)
         self.be = struct.Struct('<'+spec)
-        
+
+
 uint8 = StructSpec('B')
 uint16 = StructSpec('H')
 uint32 = StructSpec('I')

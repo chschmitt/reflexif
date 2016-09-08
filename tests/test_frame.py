@@ -92,14 +92,25 @@ class TestFrame(unittest.TestCase):
 
     def testDataFail(self):
         f = Frame(self.data, 10, 20)
-        f.source = self.data[:15]
+
+        # make frame too long
+        f.length = len(self.data)-9
+
         with self.assertRaises(EOFError):
-            f.data
+            data_slice = f.data
+
+            # debugging output
+            # used to identify https://github.com/IronLanguages/main/issues/1387
+            b = bytes(data_slice)
+            print('lengths: data_slice: %d, f: %d, f.source: %d, bytes(data_slice): %d' % (len(data_slice), len(f), len(f.source), len(b)))
+            print('f.source:              ', type(f.source), '%r' % f.source, '%r' % bytes(f.source))
+            print('wrongly returned slice:', type(data_slice), '%r' % data_slice, '%r' % b)
 
     def testBytes(self):
         f = Frame(self.data, 10, 20)
         actual = bytes(self.data[10:30])
         expected = bytes(f)
+        self.assertEqual(actual[0], 10)
         self.assertEqual(expected, actual)
 
     def testData(self):
@@ -122,7 +133,7 @@ class TestFrameWithWrapperSource(TestFrame):
 
 
 class TestFrameWithMemoryView(TestFrame):
-    data = memoryview(bytes(range(256)))
+    data = memoryview(bytes(range(80)))
 
 
 class TestFrameWithFileSource(TestFrame):

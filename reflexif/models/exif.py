@@ -15,14 +15,15 @@ from reflexif.framework.declarative import extend
 class ExifSegment(FrameObject):
     exif_start = value(0, 6, desc='Exif marker')
     tiff_header = child(TiffHeader, 6, desc='TIFF header')
-    
+
+
 @extend(TiffHeader)
 class ExifExtension(FrameObject):
     exif_ifd = child()
     gps_ifd = child()
     interop_ifd = child()
 
+
 @extend(TiffHeader, depends_on=[ExifExtension])
 class MakernoteExentsion(FrameObject):
     makernote = child()
-
