@@ -67,16 +67,32 @@ class FileSource(object):
 
             return self.read_at(index, 1)[0]
 
+    def detach(self):
+        self.fd = None
+
     def read_at(self, offset, length):
+        if offset < 0 or length < 0:
+            raise ValueError
+        if offset + length > self.length:
+            raise EOFError
         abs_offset = self.offset + offset
         self.fd.seek(abs_offset)
         if self.fd.tell() != abs_offset:
             raise IOError('seek resulted in wrong offset')
-        data = self.fd.read(length)
-        if len(data) != length:
-            raise EOFError
+        data = readexactly(self.fd, length)
         return data
 
+def readexactly(fd, n):
+    buffer = bytearray(n)
+    m = memoryview(buffer)
+    read = 0
+    while read < n:
+        r = fd.readinto(m)
+        if not r:
+            raise EOFError(bytes(m[:read]))
+        read += r
+        m = m[r:]
+    return bytes(buffer)
 
 class Frame(object):
     def __init__(self, source, offset=0, length=None):

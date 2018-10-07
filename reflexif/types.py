@@ -38,6 +38,7 @@ class Type(object):
 
 
 class UnsizedType(Type):
+    sized = False
     multiplicator = 1
 
     def __init__(self, name, code):
@@ -66,12 +67,14 @@ class BytesType(UnsizedType):
 
 
 class SizedType(Type):
+    sized = True
+
     def __init__(self, name, code, struct_def):
         self.name = name
         self.code = code
         self.struct_def = struct_def
         self.size = struct.calcsize('>' + struct_def)
-        self.multiplicator = self.size
+        # self.multiplicator = self.size
         # self.struct = None
         # self.struct = struct.Struct(struct_fmt)
 

@@ -32,7 +32,7 @@ def parse(field, returns_frame=False):
 
 
 class State(object):
-    def __init__(self, little_endian=False, resilient=True, active_extensions=None):
+    def __init__(self, little_endian=False, resilient=False, active_extensions=None):
         self.little_endian = little_endian
         self.resilient = resilient
         self.seen_ifd_pointers = set()
@@ -87,7 +87,7 @@ class Parser(object):
             try:
                 self.parse_field(field)
             except:
-                print('error: %s: %s' % (type(self), field))
+                # print('error: %s: %s' % (type(self), field))
                 raise
 
         self.parse_extensions()
@@ -154,6 +154,6 @@ class Parser(object):
         for extension in self.extensions:
             # print('parsing extension %s, parent parser: %s, target: %s' % (extension, self, self.target))
             parser_cls = self.context.resolve_parser(extension.extension_class)
-            parser = parser_cls(self.frame)
+            parser = parser_cls(self.frame, state=self.state)
             parser.target = self.target
             parser()

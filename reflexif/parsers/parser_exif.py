@@ -7,14 +7,38 @@
 from __future__ import print_function, absolute_import, division, unicode_literals
 from reflexif.compat import *
 
-from reflexif.models.exif import ExifExtension, MakernoteExentsion, ExifSegment
+from reflexif.models.exif import ExifExtension, MakernoteExentsion, JPEGExifSegment, ExifHeader
 from reflexif.parsers.parser_tiff import IFDChainParser
 from reflexif.framework.declarative import parses
 from reflexif.framework.parser_base import parse, Parser
+from reflexif.parsers.parser_jpeg import JPEGStreamParser
+from reflexif.models.jpeg import Segments
+import reflexif.io
+from reflexif import errors
+
+@parses(JPEGExifSegment)
+class JPEGExifSegmentParser(Parser):
+    def on_create(self):
+        self.fd = self.frame
+        self.frame = None
+
+    @parse(JPEGExifSegment.exif_segment_raw)
+    def parse_exif_app_segment(self):
+        parser = JPEGStreamParser(self.fd)
+        for segdata in parser.parse_segments():
+            seg = segdata.segment
+            if seg == Segments.SOS:
+                break
+            if seg.is_app and segdata.payload and segdata.payload[0:4] == b'Exif':
+                frame = reflexif.io.Frame(memoryview(segdata.payload))
+                self.frame = frame
+                return segdata, frame
+
+        raise errors.MetaDataError('no exif header found')
 
 
-@parses(ExifSegment)
-class ExifSegmentParser(Parser):
+@parses(ExifHeader)
+class ExifHeaderParser(Parser):
     pass
 
 
@@ -40,11 +64,13 @@ class ExifExtensionParser(IFDChainParser):
         if parent_ifd is None:
             parent_ifd = self.target.ifds[0]
         exif_tag = parent_ifd.search_tag(tag)
-        if not exif_tag.is_valid_pointer:
+        if exif_tag is None or not exif_tag.is_valid_pointer:
             return None, None
 
         pointer = exif_tag.values.values[0]
         ifds = self.parse_ifd_chain(pointer)
+        if not ifds:
+            return None, None
         return ifds[0], None
 
 

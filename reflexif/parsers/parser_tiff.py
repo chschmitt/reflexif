@@ -15,6 +15,7 @@ from reflexif.framework.parser_base import parse, Parser, parentalias
 
 from reflexif.framework.model_base import structs
 from reflexif.models.tiff import TiffHeader, IFD, TagHeader, TagValues
+import traceback
 
 
 class IFDChainParser(Parser):
@@ -30,9 +31,19 @@ class IFDChainParser(Parser):
                 print('circular pointers!')
                 continue
             # print(pointer)
-            ifd, _ = self.parse_class(IFD, self.frame[pointer:])
-            ifds.append(ifd)
-            self.state.seen_ifd_pointers.add(pointer)
+            # FIXME: 
+            try:
+                ifd, _ = self.parse_class(IFD, self.frame[pointer:])
+                ifds.append(ifd)
+            except IndexError:
+                raise
+
+                if self.state.resilient:
+                    continue
+                raise
+            finally:
+                self.state.seen_ifd_pointers.add(pointer)
+
         return ifds
 
 
@@ -65,22 +76,30 @@ class IFDParser(Parser):
             try:
                 return self.frame.slice(2, 12*c)
             except IndexError:
+                traceback.print_exc()
                 c -= 1
 
     @parse(IFD.tags)
     def parse_tags(self):
-        try:
-            tag_header_frame = self.frame.slice(2, 12*self.target.tag_count)
-        except IndexError:
-            if not self.state.resilient:
-                raise
-            self.truncated = True
-            tag_header_frame = self.get_tag_header_frame_resilient()
+        tag_header_frame = self.frame.slice(2, 12*self.target.tag_count)
+        #try:
+        #except IndexError:
+        #    raise
+        #    if not self.state.resilient:
+        #        traceback.print_exc()
+        #        raise
+        #    self.truncated = True
 
         tags = []
         for offset in range(0, len(tag_header_frame), 12):
-            th, _ = self.parse_child_field(IFD.tags, tag_header_frame.slice(offset, 12))
-            tags.append(th)
+            try:
+                th, _ = self.parse_child_field(IFD.tags, tag_header_frame.slice(offset, 12))
+                tags.append(th)
+            except Exception:
+                if self.state.resilient:
+                    traceback.print_exc()
+                    break
+                raise
 
         return tags, tag_header_frame
 
@@ -106,7 +125,11 @@ class TagHeaderParser(Parser):
     @parse(TagHeader.values)
     def parse_values(self):
         t = self.target.type
-        frame_size = self.target.value_count * t.multiplicator
+        if t.sized:
+            frame_size = self.target.value_count * t.size
+        else:
+            frame_size = self.target.value_count
+
         if frame_size <= 4:
             value_frame = self.frame[8:12]
             self.target.value_offset = None
@@ -119,13 +142,16 @@ class TagHeaderParser(Parser):
 
 @parses(TagValues)
 class TagValuesParser(Parser):
+    @parse(TagValues.header)
+    def parse_header(self):
+        return self.parent.target, None
 
     @parse(TagValues.values)
     def parse_values(self):
         tag_header = self.parent.target
         count = tag_header.value_count
         type_ = tag_header.type
-        if hasattr(type_, 'size'):
+        if type_.sized:
             if self.state.little_endian:
                 struct_ = structs.le[type_.struct_def]
             else:
@@ -141,5 +167,5 @@ class TagValuesParser(Parser):
             # print(values)
             return values, None
         elif tag_header.type in (Types.ASCII, Types.UNDEFINED):
-            return self.frame.data, None
+            return bytes(self.frame.data), None
         return None, None
